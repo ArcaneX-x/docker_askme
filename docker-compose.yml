@@ -4,6 +4,8 @@ services:
     env_file: .env
     image: postgres:14.6
     container_name: askme
+    volumes:
+      - db-askme:/var/lib/postgresql/data
   app:
     image: fasolshik/askme
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
@@ -18,18 +20,4 @@ services:
       RAILS_ENV: development
       RAILS_MAX_THREADS: 5
 volumes:
-  postgres_askme:
-   nginx:
-    image: nginx:1.19.0-alpine
-    volumes:
-      - ./nginx/prod/certbot/www:/var/www/certbot
-      - ./central/public/:/home/apps/central/public/:ro
-    ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      - app
-    links:
-      - app
-    restart: unless-stopped
-    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+  db-askme:
