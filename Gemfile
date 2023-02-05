@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.1.2"
+ruby "3.1.3"
 gem "rails", "~> 7.0.4"
 
 # Upload images
@@ -42,14 +42,13 @@ gem "bootsnap", require: false
 # Jquery gem
 gem "jquery-rails"
 
-group :test do
-  gem "byebug"
+group :test do  
 end
 
 group :production do
 end
 
 group :development do
-  # Use console on exceptions pages [https://github.com/rails/web-console]
+  gem "byebug"
   gem "web-console"
 end

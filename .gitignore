@@ -10,5 +10,5 @@
 
 # Ignore uploaded files in development.
 public/uploads/*
-
+/config/master.key
 .env

@@ -1,25 +1,23 @@
-FROM ruby:3.1.2-alpine
+FROM ruby:3.1.3
 
-RUN apt-get update -qq && apt-get install -yq --no-install-recommends \
-    build-essential \
-    gnupg2 \
-    less \
-    git \
-    libpq-dev \
-    postgresql-client \
-    libvips \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get update -qq && apt-get -y install apache2-utils
 
-ENV LANG=C.UTF-8 \
-  BUNDLE_JOBS=4 \
-  BUNDLE_RETRY=3
-  
-RUN gem update --system && gem install bundler
+WORKDIR /rails
 
-WORKDIR /usr/src/app
+# Set production environment
+ENV RAILS_LOG_TO_STDOUT="1" \
+    RAILS_SERVE_STATIC_FILES="true" \
+    RAILS_ENV="production" \
+    BUNDLE_WITHOUT="development"
 
-ENTRYPOINT ["./bin/docker-entrypoint.sh"]
+COPY . .
+
+RUN chmod +x /rails/bin/docker-entrypoint
 
 EXPOSE 3000
 
-CMD ["bundle", "exec", "rails", "s", "-b", "0.0.0.0"]
+RUN bundle install
+
+# Entrypoint prepares the database.
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+CMD ["./bin/rails", "server"]

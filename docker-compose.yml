@@ -1,33 +1,35 @@
+version: '3.8'
 services:
-  web:
-    build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bin/rails s -p 3000 -b '0.0.0.0'"
+  db:
+    env_file: .env
+    image: postgres:14.6
+    container_name: askme
+  app:
+    image: fasolshik/askme
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
-      - .:/usr/src/app
-      - bundle:/usr/local/bundle
+      - .:/app
     ports:
-      - "80:3000"
-    env_file:
-      - .env
-    environment:
-      - HISTFILE=/usr/src/app/log/.bash_history 
+      - "3000:3000"
     depends_on:
       - db
-      # - redis
-  db:
-    image: postgres:15
-    ports:
-      - "5432:5432"
+    env_file: .env
     environment:
-      - POSTGRES_PASSWORD=asdf1234
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-  # redis:
-    # image: redis
-    # volumes:
-      # - redis_data:/data
-
+      RAILS_ENV: development
+      RAILS_MAX_THREADS: 5
 volumes:
-  pg_data:
-  # redis_data:
-  bundle:
+  postgres_askme:
+   nginx:
+    image: nginx:1.19.0-alpine
+    volumes:
+      - ./nginx/prod/certbot/www:/var/www/certbot
+      - ./central/public/:/home/apps/central/public/:ro
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - app
+    links:
+      - app
+    restart: unless-stopped
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
